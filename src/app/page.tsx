@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { ExpiryOverview } from "@/components/food/ExpiryOverview";
 import { StorageZoneCard } from "@/components/food/StorageZoneCard";
 import { FoodCard } from "@/components/food/FoodCard";
-import type { FoodItem, StorageZone } from "@/lib/types";
+import type { FoodItem } from "@/lib/types";
 import { todayISO, formatDateCN } from "@/lib/utils/date-utils";
 
 export default function HomePage() {
@@ -17,13 +17,16 @@ export default function HomePage() {
     [] as FoodItem[]
   );
 
-  const [expired, setExpired] = useState<FoodItem[]>([]);
-  const [urgent, setUrgent] = useState<FoodItem[]>([]);
-  const [warning, setWarning] = useState<FoodItem[]>([]);
-  const [zoneCounts, setZoneCounts] = useState({ fridge: 0, freezer: 0, room: 0 });
-
-  useEffect(() => {
-    if (!activeItems) return;
+  const { expired, urgent, warning, zoneCounts, recentItems } = useMemo(() => {
+    if (!activeItems || activeItems.length === 0) {
+      return {
+        expired: [] as FoodItem[],
+        urgent: [] as FoodItem[],
+        warning: [] as FoodItem[],
+        zoneCounts: { fridge: 0, freezer: 0, room: 0 },
+        recentItems: [] as FoodItem[],
+      };
+    }
 
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -34,10 +37,7 @@ export default function HomePage() {
     const counts = { fridge: 0, freezer: 0, room: 0 };
 
     for (const item of activeItems) {
-      // Zone counts
       counts[item.storageZone]++;
-
-      // Expiry
       const expiry = new Date(item.expiryDate);
       expiry.setHours(0, 0, 0, 0);
       const diff = Math.ceil(
@@ -48,13 +48,14 @@ export default function HomePage() {
       else if (diff <= 7) warn.push(item);
     }
 
-    setExpired(exp);
-    setUrgent(urg);
-    setWarning(warn);
-    setZoneCounts(counts);
+    return {
+      expired: exp,
+      urgent: urg,
+      warning: warn,
+      zoneCounts: counts,
+      recentItems: activeItems.slice(0, 5),
+    };
   }, [activeItems]);
-
-  const recentItems = activeItems?.slice(0, 5) ?? [];
 
   return (
     <div className="p-4 space-y-6">

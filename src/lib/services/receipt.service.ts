@@ -29,7 +29,9 @@ export function enrichReceiptItems(items: ReceiptItem[]): ReceiptItem[] {
       classification.category,
       classification.storageZone,
       false,
-      todayISO()
+      todayISO(),
+      undefined,
+      classification.matchedKeyword
     );
 
     return {

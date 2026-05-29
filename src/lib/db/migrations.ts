@@ -1,11 +1,10 @@
-import { db } from "./index";
-
 /**
- * 数据库迁移占位文件
- * 当需要升级 schema 时，在此添加 db.version(N).stores({...})
- * 每个新版本必须是前一个版本 schema 的超集
+ * 数据库迁移文件
+ * Dexie version 2 新增字段: source, receiptId, matchedRuleKeyword, referenceShelfLifeDays
+ * 迁移在 db/index.ts 中通过 db.version(2).stores(...) 自动完成
  */
 
 export async function runMigrations(): Promise<void> {
-  // 当前无迁移，Dexie 自动处理 version 1
+  // Dexie 自动处理 version 1 → 2 的 schema 升级
+  // 新增字段为可选，已有记录无需数据迁移
 }

@@ -21,6 +21,10 @@
 | createdAt | string | 创建时间 |
 | updatedAt | string | 更新时间 |
 | disposedAt | string? | 处理时间 |
+| referenceShelfLifeDays | number? | 自动计算的参考保质天数 |
+| matchedRuleKeyword | string? | 匹配到的规则关键词 |
+| source | string? | 录入来源：manual/receipt_mock/receipt_ocr |
+| receiptId | string? | 关联的小票导入记录 ID |
 
 ### ReceiptImport（小票导入记录）
 
@@ -44,10 +48,10 @@
 | openedAdjustment | number | 开封后保质期缩减比例 |
 | referenceNote | string? | 备注 |
 
-## IndexedDB Schema (Dexie v1)
+## IndexedDB Schema (Dexie v2)
 
 ```
-foodItems: id, name, category, storageZone, status, expiryDate, purchaseDate, createdAt, updatedAt
+foodItems: id, name, category, storageZone, status, expiryDate, purchaseDate, createdAt, updatedAt, source, receiptId, matchedRuleKeyword
 receipts: id, createdAt
 ```
 

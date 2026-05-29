@@ -13,6 +13,7 @@ import {
 } from "@/lib/types";
 import { getAutoFillDefaults } from "@/lib/services/food-item.service";
 import { calculateShelfLife } from "@/lib/utils/shelf-life-calculator";
+import { classifyFood } from "@/lib/services/classification.service";
 import { todayISO } from "@/lib/utils/date-utils";
 
 const categories: FoodCategory[] = [
@@ -38,7 +39,7 @@ export function FoodForm({
   const [submitting, setSubmitting] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const nameRef = useRef<string>("");
-
+  const matchedKeywordRef = useRef<string | undefined>(undefined);
   const {
     register,
     handleSubmit,
@@ -82,6 +83,9 @@ export function FoodForm({
         setValue("expiryDate", defaults.expiryDate);
         setValue("expirySource", "auto");
       }
+      // 保存匹配的关键词，用于后续保质期重算
+      const cls = classifyFood(watchedName);
+      matchedKeywordRef.current = cls.matchedKeyword;
     }, 300);
 
     return () => {
@@ -98,7 +102,9 @@ export function FoodForm({
       watchedCategory,
       watchedZone,
       watchedOpened,
-      watchedPurchaseDate || todayISO()
+      watchedPurchaseDate || todayISO(),
+      undefined,
+      matchedKeywordRef.current
     );
     setValue("expiryDate", result.expiryDate);
   }, [watchedZone, watchedOpened, watchedCategory, watchedPurchaseDate, watchedExpirySource, setValue]);

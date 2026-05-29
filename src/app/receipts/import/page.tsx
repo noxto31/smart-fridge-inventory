@@ -52,6 +52,30 @@ export default function ReceiptImportPage() {
     ]);
   };
 
+  const handleNameBlur = (index: number, name: string) => {
+    if (!name.trim()) return;
+    const classification = classifyFood(name);
+    if (!classification.matched) return;
+    const shelfLife = calculateShelfLife(
+      classification.category,
+      classification.storageZone,
+      false,
+      todayISO(),
+      undefined,
+      classification.matchedKeyword
+    );
+    const updated = [...items];
+    updated[index] = {
+      ...updated[index],
+      name,
+      category: classification.category,
+      storageZone: classification.storageZone,
+      expiryDate: shelfLife.expiryDate,
+      expirySource: "auto",
+    };
+    setItems(updated);
+  };
+
   const handleConfirmImport = async () => {
     const validItems = items.filter((i) => i.name.trim());
     if (validItems.length === 0) {
@@ -67,7 +91,9 @@ export default function ReceiptImportPage() {
           item.category ?? classification.category,
           item.storageZone ?? classification.storageZone,
           false,
-          todayISO()
+          todayISO(),
+          undefined,
+          classification.matchedKeyword
         );
         return {
           name: item.name,
@@ -82,8 +108,8 @@ export default function ReceiptImportPage() {
         };
       });
 
-      await createFoodItems(formData);
-      await saveReceipt(validItems, imagePreview);
+      const receiptId = await saveReceipt(validItems, imagePreview);
+      await createFoodItems(formData, { source: "receipt_mock", receiptId });
       show(`已导入 ${validItems.length} 项食品`, "success");
       router.push("/");
     } finally {
@@ -126,6 +152,7 @@ export default function ReceiptImportPage() {
             onItemChange={handleItemChange}
             onItemRemove={handleItemRemove}
             onItemAdd={handleItemAdd}
+            onNameBlur={handleNameBlur}
           />
 
           <div className="space-y-2">

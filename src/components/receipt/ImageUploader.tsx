@@ -57,6 +57,7 @@ export function ImageUploader({ onImageSelected }: ImageUploaderProps) {
 
       {preview ? (
         <div className="space-y-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- blob/data-URL preview, next/image cannot handle it */}
           <img
             src={preview}
             alt="小票预览"

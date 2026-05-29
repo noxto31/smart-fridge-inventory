@@ -1,5 +1,41 @@
 # 迭代日志
 
+## V1.0.1 - 2026-05-29
+
+### 稳定化修正
+
+**工程脚本**
+- ESLint 迁移为 flat config (`eslint.config.mjs`)，适配 Next.js 16
+- lint 脚本改为 `eslint src/`（兼容中文目录路径）
+- viewport / themeColor 迁移至 `export const viewport`，消除 build 警告
+- 全部四项脚本 (lint / typecheck / build / test) 零错误通过
+
+**保质期规则匹配修正**
+- 修复「同分类不同食品共用错误保质天数」的根本原因
+- `classifyFood` 返回 `matchedRuleKeyword`，`calculateShelfLife` 支持按关键词查找特定规则
+- 草莓 3 天 vs 苹果 21 天 等场景现在各自独立计算
+- 新增 14 项 per-food 保质期集成测试
+
+**小票导入增强**
+- RecognizedItemsList 支持编辑分类、存放位置、到期日期
+- 名称失焦后自动重新分类并更新建议值
+
+**数据模型补强 (Dexie v2)**
+- 新增字段: `referenceShelfLifeDays`、`matchedRuleKeyword`、`source`、`receiptId`
+- `createFoodItem` / `createFoodItems` 自动填充元数据
+- DATA_MODEL.md 已同步更新
+
+**代码质量**
+- 消除 `set-state-in-effect` ESLint error (DisclaimerBar lazy init)
+- 移除未使用的 import (ExpiryOverview, migrations.ts)
+- not-found 页面 `<a>` → `<Link>`
+
+### 测试
+
+- 测试文件: 3 个，用例: 42 条 (原 28 + 新增 14)
+
+---
+
 ## V1.0 - 2026-05-28
 
 ### 完成内容

@@ -16,26 +16,56 @@ import { todayISO } from "@/lib/utils/date-utils";
 export async function createFoodItem(data: FoodItemFormData): Promise<string> {
   const now = nowISO();
   const id = crypto.randomUUID();
+  const classification = classifyFood(data.name);
+  const shelfLife = calculateShelfLife(
+    data.category,
+    data.storageZone,
+    data.opened,
+    data.purchaseDate,
+    data.expirySource === "manual" ? data.expiryDate : undefined,
+    classification.matchedKeyword
+  );
   const item: FoodItem = {
     id,
     ...data,
     status: "active",
     createdAt: now,
     updatedAt: now,
+    referenceShelfLifeDays: shelfLife.shelfLifeDays,
+    matchedRuleKeyword: classification.matchedKeyword,
+    source: "manual",
   };
   await db.foodItems.add(item);
   return id;
 }
 
-export async function createFoodItems(items: FoodItemFormData[]): Promise<string[]> {
+export async function createFoodItems(
+  items: FoodItemFormData[],
+  meta?: { source?: "receipt_mock" | "receipt_ocr"; receiptId?: string }
+): Promise<string[]> {
   const now = nowISO();
-  const entries: FoodItem[] = items.map((data) => ({
-    id: crypto.randomUUID(),
-    ...data,
-    status: "active" as const,
-    createdAt: now,
-    updatedAt: now,
-  }));
+  const entries: FoodItem[] = items.map((data) => {
+    const classification = classifyFood(data.name);
+    const shelfLife = calculateShelfLife(
+      data.category,
+      data.storageZone,
+      data.opened,
+      data.purchaseDate,
+      data.expirySource === "manual" ? data.expiryDate : undefined,
+      classification.matchedKeyword
+    );
+    return {
+      id: crypto.randomUUID(),
+      ...data,
+      status: "active" as const,
+      createdAt: now,
+      updatedAt: now,
+      referenceShelfLifeDays: shelfLife.shelfLifeDays,
+      matchedRuleKeyword: classification.matchedKeyword,
+      source: meta?.source ?? "receipt_mock",
+      receiptId: meta?.receiptId,
+    };
+  });
   await db.foodItems.bulkAdd(entries);
   return entries.map((e) => e.id);
 }
@@ -54,7 +84,9 @@ export function getAutoFillDefaults(name: string): {
     classification.category,
     classification.storageZone,
     false,
-    todayISO()
+    todayISO(),
+    undefined,
+    classification.matchedKeyword
   );
   return {
     category: classification.category,

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { FoodItem } from "@/lib/types";
-import { Badge } from "@/components/ui/Badge";
 import { daysUntilExpiry } from "@/lib/utils/shelf-life-calculator";
 import { relativeDateLabel } from "@/lib/utils/date-utils";
 

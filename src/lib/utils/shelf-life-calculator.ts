@@ -15,7 +15,8 @@ export function calculateShelfLife(
   storageZone: StorageZone,
   opened: boolean,
   purchaseDate?: string,
-  manualExpiryDate?: string
+  manualExpiryDate?: string,
+  matchedKeyword?: string
 ): ShelfLifeResult {
   // 用户手动指定的日期优先
   if (manualExpiryDate) {
@@ -28,10 +29,15 @@ export function calculateShelfLife(
     return { shelfLifeDays: days, expiryDate: manualExpiryDate };
   }
 
-  // 查找匹配的规则（精确匹配分类+存放位置）
-  const matchedRule = shelfLifeRules.find(
-    (r) => r.category === category && r.recommendedStorageLocation === storageZone
-  );
+  // 优先使用名称关键词匹配的特定规则（避免同分类不同食品共用错误保质期）
+  const keywordLower = matchedKeyword?.toLowerCase();
+  const matchedRule = keywordLower
+    ? shelfLifeRules.find(
+        (r) => r.keyword.toLowerCase() === keywordLower
+      )
+    : shelfLifeRules.find(
+        (r) => r.category === category && r.recommendedStorageLocation === storageZone
+      );
 
   let days: number;
 

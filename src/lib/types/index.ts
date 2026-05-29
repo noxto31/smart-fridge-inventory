@@ -73,6 +73,10 @@ export interface FoodItem {
   createdAt: string;
   updatedAt: string;
   disposedAt?: string;
+  referenceShelfLifeDays?: number;
+  matchedRuleKeyword?: string;
+  source?: "manual" | "receipt_mock" | "receipt_ocr";
+  receiptId?: string;
 }
 
 // === Validation Schemas ===
@@ -128,6 +132,7 @@ export interface ClassificationResult {
   category: FoodCategory;
   storageZone: StorageZone;
   matched: boolean;
+  matchedKeyword?: string;
 }
 
 export interface ShelfLifeResult {

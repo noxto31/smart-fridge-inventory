@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function DisclaimerBar() {
-  const [dismissed, setDismissed] = useState(true);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("disclaimer-dismissed");
-    setDismissed(stored === "true");
-  }, []);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("disclaimer-dismissed") === "true";
+  });
 
   if (dismissed) return null;
 

@@ -12,6 +12,12 @@ db.version(1).stores({
   receipts: "id, createdAt",
 });
 
+db.version(2).stores({
+  foodItems:
+    "id, name, category, storageZone, status, expiryDate, purchaseDate, createdAt, updatedAt, source, receiptId, matchedRuleKeyword",
+  receipts: "id, createdAt",
+});
+
 // Ensure Dexie is only used client-side
 if (typeof window !== "undefined") {
   db.open().catch((err) => {

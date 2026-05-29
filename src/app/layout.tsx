@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DisclaimerBar } from "@/components/layout/DisclaimerBar";
@@ -8,13 +8,14 @@ export const metadata: Metadata = {
   title: "家庭冰箱库存管理",
   description: "管理家庭冰箱食材，追踪保质期，减少浪费",
   manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
   themeColor: "#10b981",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    viewportFit: "cover",
-  },
 };
 
 export default function RootLayout({

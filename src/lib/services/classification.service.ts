@@ -18,6 +18,7 @@ export function classifyFood(name: string): ClassificationResult {
         category: rule.category,
         storageZone: rule.recommendedStorageLocation,
         matched: true,
+        matchedKeyword: rule.keyword,
       };
     }
   }
