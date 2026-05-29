@@ -12,15 +12,27 @@ export function classifyFood(name: string): ClassificationResult {
     return { category: "other", storageZone: "fridge", matched: false };
   }
 
+  // 收集所有匹配规则，按关键词长度降序选择最具体的匹配。
+  // 例如 "三文鱼"(3字) 优先于 "鱼"(1字)，"番茄酱"(3字) 优先于 "番茄"(2字)。
+  // 长度相同时取数组中先出现的那条（规则库作者可通过排列控制同长度关键词的优先级）。
+  let bestRule: (typeof shelfLifeRules)[number] | null = null;
+  let bestLen = 0;
+
   for (const rule of shelfLifeRules) {
-    if (normalized.includes(rule.keyword.toLowerCase())) {
-      return {
-        category: rule.category,
-        storageZone: rule.recommendedStorageLocation,
-        matched: true,
-        matchedKeyword: rule.keyword,
-      };
+    const keywordLower = rule.keyword.toLowerCase();
+    if (normalized.includes(keywordLower) && keywordLower.length > bestLen) {
+      bestRule = rule;
+      bestLen = keywordLower.length;
     }
+  }
+
+  if (bestRule) {
+    return {
+      category: bestRule.category,
+      storageZone: bestRule.recommendedStorageLocation,
+      matched: true,
+      matchedKeyword: bestRule.keyword,
+    };
   }
 
   return { category: "other", storageZone: "fridge", matched: false };

@@ -115,6 +115,11 @@ export interface ReceiptItem {
   storageZone?: StorageZone;
   expiryDate?: string;
   expirySource?: "auto" | "manual";
+  manualOverrides?: {
+    category?: boolean;
+    storageZone?: boolean;
+    expiryDate?: boolean;
+  };
 }
 
 // === Rules Types ===

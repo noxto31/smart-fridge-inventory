@@ -1,5 +1,5 @@
 import type { FoodCategory, StorageZone, ShelfLifeResult } from "@/lib/types";
-import { shelfLifeRules, DEFAULT_SHELF_LIFE } from "@/lib/rules/shelf-life-rules";
+import { shelfLifeRules, DEFAULT_SHELF_LIFE, CATEGORY_DEFAULT_SHELF_LIFE } from "@/lib/rules/shelf-life-rules";
 
 /**
  * 计算参考保质期天数和到期日期
@@ -30,14 +30,13 @@ export function calculateShelfLife(
   }
 
   // 优先使用名称关键词匹配的特定规则（避免同分类不同食品共用错误保质期）
+  // 无关键词时跳过具体规则查找，直接使用分类默认规则
   const keywordLower = matchedKeyword?.toLowerCase();
   const matchedRule = keywordLower
     ? shelfLifeRules.find(
         (r) => r.keyword.toLowerCase() === keywordLower
       )
-    : shelfLifeRules.find(
-        (r) => r.category === category && r.recommendedStorageLocation === storageZone
-      );
+    : null;
 
   let days: number;
 
@@ -47,16 +46,14 @@ export function calculateShelfLife(
       ? Math.max(1, Math.round(baseDays * matchedRule.openedAdjustment))
       : baseDays;
   } else {
-    // 尝试只匹配分类
-    const categoryRule = shelfLifeRules.find((r) => r.category === category);
-    if (categoryRule) {
-      const baseDays =
-        categoryRule.shelfLifeByStorage[storageZone] ??
-        categoryRule.shelfLifeByStorage[categoryRule.recommendedStorageLocation] ??
-        DEFAULT_SHELF_LIFE[storageZone] ??
-        7;
+    // 使用分类默认规则（不套用同分类中的具体食品保质期）
+    const categoryDefaults = CATEGORY_DEFAULT_SHELF_LIFE[category];
+    if (categoryDefaults) {
+      const baseDays = categoryDefaults[storageZone] ?? DEFAULT_SHELF_LIFE[storageZone] ?? 7;
+      // 分类默认规则使用通用的开封缩减比例
+      const openedFactor = category === "leftover" || category === "snack" ? 1 : 0.5;
       days = opened
-        ? Math.max(1, Math.round(baseDays * categoryRule.openedAdjustment))
+        ? Math.max(1, Math.round(baseDays * openedFactor))
         : baseDays;
     } else {
       // 完全兜底

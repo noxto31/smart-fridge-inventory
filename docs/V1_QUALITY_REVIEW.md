@@ -85,3 +85,72 @@
 - 无云端同步
 - 无推送通知
 - 离线数据导出未实现
+
+---
+
+# V1.0.2 检查章节
+
+审查日期: 2026-05-29  
+基线提交: `12a9eb9` (V1.0.1)
+
+## 1. 关键词匹配优先级
+
+**问题:** `classifyFood` 按数组顺序返回第一个 `includes()` 匹配，短关键词会抢先命中。
+
+**修复:** 改为「最长关键词优先」——遍历所有规则，取 `keyword.length` 最大的匹配。同长度取数组先出现的条目。
+
+| 输入 | 旧结果 | 新结果 |
+|------|--------|--------|
+| 三文鱼 | 鱼(seafood) | 三文鱼(seafood) ✅ |
+| 番茄酱 | 番茄(vegetable) | 番茄酱(condiment) ✅ |
+| 辣椒酱 | 辣椒(vegetable) | 辣椒酱(condiment) ✅ |
+| 速冻饺子 | 饺子(grain) | 饺子(grain) ✅ (同长度取先出现) |
+
+## 2. 小票导入 expirySource 保留
+
+**问题:** `handleConfirmImport` 硬编码 `expirySource: "auto"`。
+
+**修复:** 改为 `item.expirySource ?? "auto"`。
+
+## 3. 手动修改保护
+
+**问题:** `handleNameBlur` 重新分类时覆盖用户已手动调整的字段。
+
+**修复:** 
+- `ReceiptItem` 新增 `manualOverrides?: { category?, storageZone?, expiryDate? }`
+- 手动修改时设置标记
+- `handleNameBlur` 仅更新未标记的字段
+- 新增"恢复自动建议"操作
+
+## 4. 分类默认保质期
+
+**问题:** `calculateShelfLife` 无具体规则匹配时使用 `shelfLifeRules.find(category)` 取第一条具体规则。
+
+**修复:** 新增 `CATEGORY_DEFAULT_SHELF_LIFE`，12 个分类各有独立默认值。优先级链：
+1. 手动到期日期
+2. 命中的具体食品规则 (by keyword)
+3. 分类默认参考规则 (CATEGORY_DEFAULT_SHELF_LIFE)
+4. 全局存放位置兜底 (DEFAULT_SHELF_LIFE)
+
+## 5. 测试覆盖
+
+| 文件 | 用例数 | 新增内容 |
+|------|--------|----------|
+| classification.test.ts | 17 | +4 关键词优先级 |
+| shelf-life-calculator.test.ts | 15 | 更新分类默认值期望 |
+| per-food-shelf-life.test.ts | 20 | +2 优先级保质期, +4 分类兜底 |
+| receipt-override.test.ts | 7 | +7 手动修改保护 |
+| **合计** | **59** | **+17** |
+
+## 6. CI
+
+- `.github/workflows/ci.yml` 已创建
+- 触发条件: push / pull_request → master
+- 步骤: npm ci → lint → typecheck → test → build
+
+## 7. 版本记录
+
+- `package.json`: `1.0.2` ✅
+- `CHANGELOG.md`: 已创建 ✅
+- `ITERATION_LOG.md`: V1.0.2 条目已追加 ✅
+- Git Tag: 待提交后创建

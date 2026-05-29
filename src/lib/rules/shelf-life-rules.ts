@@ -1,4 +1,4 @@
-import type { ShelfLifeRule } from "@/lib/types";
+import type { ShelfLifeRule, FoodCategory } from "@/lib/types";
 
 /**
  * 食品保存规则库
@@ -719,4 +719,24 @@ export const DEFAULT_SHELF_LIFE: Record<string, number> = {
   fridge: 7,
   freezer: 90,
   room: 30,
+};
+
+/**
+ * 分类默认保质期 — 当无法匹配到具体食品规则时使用。
+ * 与 shelfLifeRules 中的具体食品规则严格分离，避免未识别食品被错误套用同分类中的某一种具体食品保质期。
+ * 例如：未识别的水果不应自动使用「苹果」的 21 天保质期。
+ */
+export const CATEGORY_DEFAULT_SHELF_LIFE: Partial<Record<FoodCategory, Record<string, number>>> = {
+  vegetable: { fridge: 7, freezer: 60, room: 5 },
+  fruit:     { fridge: 7, freezer: 90, room: 5 },
+  meat:      { fridge: 3, freezer: 180, room: 1 },
+  seafood:   { fridge: 2, freezer: 90, room: 1 },
+  dairy:     { fridge: 14, room: 1 },
+  egg:       { fridge: 30, room: 14 },
+  grain:     { fridge: 5, room: 7, freezer: 30 },
+  condiment: { room: 180, fridge: 180 },
+  beverage:  { fridge: 14, room: 30 },
+  frozen:    { freezer: 90 },
+  snack:     { room: 90 },
+  leftover:  { fridge: 2 },
 };

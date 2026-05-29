@@ -48,6 +48,19 @@
 | openedAdjustment | number | 开封后保质期缩减比例 |
 | referenceNote | string? | 备注 |
 
+### ReceiptItem（小票识别条目）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| name | string | 食品名称 |
+| quantity | number | 数量 |
+| unit | string | 单位 |
+| category | FoodCategory? | 分类 |
+| storageZone | StorageZone? | 存放位置 |
+| expiryDate | string? | 到期日期 |
+| expirySource | "auto"/"manual"? | 来源 |
+| manualOverrides | object? | 手动修改标记: `{ category?, storageZone?, expiryDate? }` |
+
 ## IndexedDB Schema (Dexie v2)
 
 ```

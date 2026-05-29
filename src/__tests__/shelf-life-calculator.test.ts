@@ -39,9 +39,9 @@ describe("calculateShelfLife", () => {
     expect(result.shelfLifeDays).toBeGreaterThan(0);
   });
 
-  it("冷冻海鲜保质期", () => {
+  it("冷冻海鲜保质期（分类默认值）", () => {
     const result = calculateShelfLife("seafood", "freezer", false, "2026-01-01");
-    expect(result.shelfLifeDays).toBe(120);
+    expect(result.shelfLifeDays).toBe(90);
   });
 
   it("开封后保质期应缩短", () => {

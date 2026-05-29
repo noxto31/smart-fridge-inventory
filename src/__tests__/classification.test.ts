@@ -90,4 +90,31 @@ describe("classifyFood", () => {
     expect(result.storageZone).toBe("fridge");
     expect(result.matched).toBe(true);
   });
+
+  // === V1.0.2 关键词优先级测试 ===
+
+  it("三文鱼优先匹配「三文鱼」而非「鱼」", () => {
+    const result = classifyFood("三文鱼");
+    expect(result.matchedKeyword).toBe("三文鱼");
+    expect(result.category).toBe("seafood");
+  });
+
+  it("番茄酱优先匹配「番茄酱」而非「番茄」", () => {
+    const result = classifyFood("番茄酱");
+    expect(result.category).toBe("condiment");
+    expect(result.matchedKeyword).toBe("番茄酱");
+  });
+
+  it("辣椒酱优先匹配「辣椒酱」而非「辣椒」", () => {
+    const result = classifyFood("辣椒酱");
+    expect(result.category).toBe("condiment");
+    expect(result.matchedKeyword).toBe("辣椒酱");
+  });
+
+  it("速冻饺子：同长度关键词取数组先出现的「饺子」", () => {
+    const result = classifyFood("速冻饺子");
+    // "速冻"(2字) 与 "饺子"(2字) 长度相同，"饺子"在规则库中位置更靠前
+    expect(result.matchedKeyword).toBe("饺子");
+    expect(result.category).toBe("grain");
+  });
 });

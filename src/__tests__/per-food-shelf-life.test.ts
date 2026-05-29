@@ -119,4 +119,48 @@ describe("per-food shelf life via classifyFood + calculateShelfLife", () => {
     expect(cls.matched).toBe(false);
     expect(cls.matchedKeyword).toBeUndefined();
   });
+
+  // === V1.0.2 关键词优先级 → 保质期正确性 ===
+
+  it("三文鱼使用三文鱼规则（冷藏 2 天），不使用普通鱼规则（冷藏 2 天）", () => {
+    const cls = classifyFood("三文鱼");
+    expect(cls.matchedKeyword).toBe("三文鱼");
+    const r = getShelfLifeFor("三文鱼");
+    // 三文鱼规则: fridge=2, 与鱼规则天数相同但规则来源不同
+    expect(r.shelfLifeDays).toBe(2);
+  });
+
+  it("番茄酱使用调味品规则（冷藏 180 天），不使用番茄蔬菜规则（冷藏 7 天）", () => {
+    const cls = classifyFood("番茄酱");
+    expect(cls.matchedKeyword).toBe("番茄酱");
+    expect(cls.category).toBe("condiment");
+    const r = getShelfLifeFor("番茄酱");
+    expect(r.shelfLifeDays).toBe(180);
+  });
+
+  // === V1.0.2 分类默认规则兜底（不套用具体食品规则） ===
+
+  it("未识别水果手动指定分类时，不自动使用苹果规则", () => {
+    // 直接调用 calculateShelfLife，不传 matchedKeyword，模拟"未识别但手动选了分类"
+    const r = calculateShelfLife("fruit", "fridge", false, "2026-01-01");
+    // 分类默认规则: fruit.fridge = 7，而非苹果的 21
+    expect(r.shelfLifeDays).toBe(7);
+  });
+
+  it("未识别蔬菜手动指定分类时，不自动使用青菜规则", () => {
+    const r = calculateShelfLife("vegetable", "fridge", false, "2026-01-01");
+    // 分类默认规则: vegetable.fridge = 7，而非青菜的 5
+    expect(r.shelfLifeDays).toBe(7);
+  });
+
+  it("完全未识别且分类为 other 时，走通用兜底 7 天", () => {
+    const r = calculateShelfLife("other", "fridge", false, "2026-01-01");
+    expect(r.shelfLifeDays).toBe(7);
+  });
+
+  it("未识别肉类手动指定分类时，走肉类默认冷藏 3 天", () => {
+    const r = calculateShelfLife("meat", "fridge", false, "2026-01-01");
+    // 分类默认规则: meat.fridge = 3
+    expect(r.shelfLifeDays).toBe(3);
+  });
 });

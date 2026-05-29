@@ -56,6 +56,35 @@ export default function ReceiptImportPage() {
     if (!name.trim()) return;
     const classification = classifyFood(name);
     if (!classification.matched) return;
+    const item = items[index];
+    const overrides = item.manualOverrides;
+
+    const shelfLife = calculateShelfLife(
+      overrides?.category ? item.category! : classification.category,
+      overrides?.storageZone ? item.storageZone! : classification.storageZone,
+      false,
+      todayISO(),
+      undefined,
+      classification.matchedKeyword
+    );
+
+    const updated = [...items];
+    updated[index] = {
+      ...updated[index],
+      name,
+      // 仅更新未被用户手动修改的字段
+      category: overrides?.category ? item.category : classification.category,
+      storageZone: overrides?.storageZone ? item.storageZone : classification.storageZone,
+      expiryDate: overrides?.expiryDate ? item.expiryDate : shelfLife.expiryDate,
+      expirySource: overrides?.expiryDate ? item.expirySource : "auto",
+    };
+    setItems(updated);
+  };
+
+  const handleRestoreAuto = (index: number) => {
+    const item = items[index];
+    const classification = classifyFood(item.name);
+    if (!classification.matched) return;
     const shelfLife = calculateShelfLife(
       classification.category,
       classification.storageZone,
@@ -67,11 +96,11 @@ export default function ReceiptImportPage() {
     const updated = [...items];
     updated[index] = {
       ...updated[index],
-      name,
       category: classification.category,
       storageZone: classification.storageZone,
       expiryDate: shelfLife.expiryDate,
       expirySource: "auto",
+      manualOverrides: undefined,
     };
     setItems(updated);
   };
@@ -87,14 +116,22 @@ export default function ReceiptImportPage() {
     try {
       const formData: FoodItemFormData[] = validItems.map((item) => {
         const classification = classifyFood(item.name);
-        const shelfLife = calculateShelfLife(
-          item.category ?? classification.category,
-          item.storageZone ?? classification.storageZone,
-          false,
-          todayISO(),
-          undefined,
-          classification.matchedKeyword
-        );
+        const effectiveExpirySource = item.expirySource ?? "auto";
+        // 如果用户未手动改到期日，用自动规则计算；否则保留用户值
+        let expiryDate: string;
+        if (item.expiryDate && effectiveExpirySource === "manual") {
+          expiryDate = item.expiryDate;
+        } else {
+          const shelfLife = calculateShelfLife(
+            item.category ?? classification.category,
+            item.storageZone ?? classification.storageZone,
+            false,
+            todayISO(),
+            undefined,
+            classification.matchedKeyword
+          );
+          expiryDate = item.expiryDate ?? shelfLife.expiryDate;
+        }
         return {
           name: item.name,
           category: item.category ?? classification.category,
@@ -102,9 +139,9 @@ export default function ReceiptImportPage() {
           quantity: item.quantity,
           unit: item.unit,
           purchaseDate: todayISO(),
-          expiryDate: item.expiryDate ?? shelfLife.expiryDate,
+          expiryDate,
           opened: false,
-          expirySource: "auto" as const,
+          expirySource: effectiveExpirySource,
         };
       });
 
@@ -153,6 +190,7 @@ export default function ReceiptImportPage() {
             onItemRemove={handleItemRemove}
             onItemAdd={handleItemAdd}
             onNameBlur={handleNameBlur}
+            onRestoreAuto={handleRestoreAuto}
           />
 
           <div className="space-y-2">

@@ -16,6 +16,7 @@ interface RecognizedItemsListProps {
   onItemRemove: (index: number) => void;
   onItemAdd: () => void;
   onNameBlur?: (index: number, name: string) => void;
+  onRestoreAuto?: (index: number) => void;
 }
 
 export function RecognizedItemsList({
@@ -24,6 +25,7 @@ export function RecognizedItemsList({
   onItemRemove,
   onItemAdd,
   onNameBlur,
+  onRestoreAuto,
 }: RecognizedItemsListProps) {
   if (items.length === 0) {
     return (
@@ -93,6 +95,7 @@ export function RecognizedItemsList({
                 onItemChange(index, {
                   ...item,
                   category: e.target.value as FoodCategory,
+                  manualOverrides: { ...item.manualOverrides, category: true },
                 })
               }
               className="flex-1 text-xs px-2 py-1.5 border border-gray-200 rounded bg-white focus:border-primary outline-none"
@@ -109,7 +112,11 @@ export function RecognizedItemsList({
                   key={zone}
                   type="button"
                   onClick={() =>
-                    onItemChange(index, { ...item, storageZone: zone })
+                    onItemChange(index, {
+                      ...item,
+                      storageZone: zone,
+                      manualOverrides: { ...item.manualOverrides, storageZone: true },
+                    })
                   }
                   className={`text-xs px-2 py-1.5 rounded border transition-colors ${
                     item.storageZone === zone
@@ -127,7 +134,7 @@ export function RecognizedItemsList({
             </div>
           </div>
 
-          {/* 第四行：到期日期 */}
+          {/* 第四行：到期日期 + 恢复自动建议 */}
           <div className="flex items-center gap-2">
             <label className="text-xs text-gray-500 shrink-0">到期日</label>
             <input
@@ -138,10 +145,23 @@ export function RecognizedItemsList({
                   ...item,
                   expiryDate: e.target.value,
                   expirySource: e.target.value ? "manual" : "auto",
+                  manualOverrides: { ...item.manualOverrides, expiryDate: !!e.target.value },
                 })
               }
               className="flex-1 text-xs px-2 py-1.5 border border-gray-200 rounded focus:border-primary outline-none"
             />
+            {item.manualOverrides &&
+              (item.manualOverrides.category ||
+                item.manualOverrides.storageZone ||
+                item.manualOverrides.expiryDate) && (
+                <button
+                  type="button"
+                  onClick={() => onRestoreAuto?.(index)}
+                  className="text-xs text-primary hover:underline shrink-0"
+                >
+                  恢复自动
+                </button>
+              )}
           </div>
         </div>
       ))}
