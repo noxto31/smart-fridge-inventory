@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+> **Note:** From v1.0.2 onward, this file is maintained by
+> [Release Please](https://github.com/googleapis/release-please-action).
+> See [docs/RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md) for details.
+
 ## [1.0.2] - 2026-05-29
 
 ### Fixed
