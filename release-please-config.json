@@ -2,12 +2,11 @@
   "packages": {
     ".": {
       "release-type": "node",
+      "component": "",
       "changelog-path": "docs/CHANGELOG.md",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
-      "extra-files": [
-        "docs/ITERATION_LOG.md"
-      ]
+      "extra-files": []
     }
   },
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
