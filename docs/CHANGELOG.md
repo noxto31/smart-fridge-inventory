@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 > [Release Please](https://github.com/googleapis/release-please-action).
 > See [docs/RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md) for details.
 
+## [1.0.3](https://github.com/noxto31/smart-fridge-inventory/compare/v1.0.2...v1.0.3) (2026-05-31)
+
+
+### Bug Fixes
+
+* sync package-lock.json version with package.json ([c8a46c3](https://github.com/noxto31/smart-fridge-inventory/commit/c8a46c34250aa4c3ebafc8a1c3c26de0e2517a1b))
+
 ## [1.0.2] - 2026-05-29
 
 ### Fixed
